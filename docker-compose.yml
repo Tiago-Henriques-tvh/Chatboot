@@ -1,0 +1,53 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.9.2
+    container_name: qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      # Qdrant's live index MUST be on a POSIX filesystem, so we use a Docker
+      # named volume (system disk) rather than the exFAT/NTFS external drive.
+      - qdrant_storage:/qdrant/storage
+    networks:
+      - rag_net
+
+  app:
+    build: .
+    container_name: agentic_rag_mcp
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      # Ingestion source inside the container (bind-mounted below).
+      DATA_PATH: /app/data
+      # Embedding cache on a named volume; disable symlinks so it also works
+      # even if a cache dir ever lands on exFAT/NTFS.
+      HF_CACHE_DIR: /cache/huggingface
+      HF_HOME: /cache/huggingface
+      HF_HUB_DISABLE_SYMLINKS: "1"
+    ports:
+      - "8000:8000"
+    volumes:
+      # Your raw knowledge files. DOCS_HOST_PATH can point at the big external
+      # drive (e.g. /mnt/storage/chatbot/data) — reading files from exFAT/NTFS
+      # is safe. Defaults to the repo's ./data folder.
+      - ${DOCS_HOST_PATH:-./data}:/app/data
+      - hf_cache:/cache/huggingface
+    depends_on:
+      - qdrant
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - rag_net
+
+volumes:
+  qdrant_storage:
+  hf_cache:
+
+networks:
+  rag_net:
+    driver: bridge

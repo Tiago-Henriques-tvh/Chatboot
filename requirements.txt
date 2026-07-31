@@ -1,0 +1,27 @@
+# Web framework & server
+fastapi==0.141.1
+uvicorn[standard]==0.52.0
+pydantic==2.13.4
+pydantic-settings==2.14.2
+httpx==0.28.1
+
+# Model Context Protocol
+fastmcp==2.14.7
+
+# LangChain / LangGraph agent stack
+langchain==0.3.14
+langchain-core==0.3.29
+langchain-community==0.3.14
+langchain-ollama==0.2.2
+langchain-huggingface==0.1.2
+langchain-qdrant==0.2.0
+langchain-text-splitters==0.3.5
+langgraph==0.2.62
+
+# Vector DB & embeddings
+qdrant-client==1.12.2
+sentence-transformers==3.3.1
+
+# Document loaders & web search
+pypdf==5.1.0
+duckduckgo-search==6.4.2
